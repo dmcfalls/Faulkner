@@ -53,12 +53,13 @@ def main():
 				for word in re.split(r'(\s+)', line):
 					# Replace word with word from dictionary if min-cost replacement has cost < 3
 					word_clean = word.strip().lower()
-					if '\n' in word or word_clean in dictionary:
+					if '\n' in word or '\r\n' in word or word in dictionary or word_clean in dictionary:
 						outputfile.write(word)
 					else:
 						(cost, correction) = min_cost_correction(word_clean, dictionary)
 						if cost < 3:
 							outputfile.write(correction)
+							outputfile.write(" ")
 						else:
 							outputfile.write(word)
 	textfile.close()
