@@ -54,6 +54,7 @@ def print_title_and_underline(title):
 
 def print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text):
     print("Word count: " + str(len(text)))
+    print("Sentence count: " + str(len(sentences)))
     print("Unique words: " + str(unique_words(text)))
     print("Unique words (stemmed): " + str(unique_words(stemmed_text)))
     print("Average sentence length: {0:.2f}".format(average_sentence_length(text, sentences)))
