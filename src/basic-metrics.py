@@ -2,6 +2,7 @@
 
 import nltk
 import os
+import io
 import string
 
 from nltk.tokenize import word_tokenize         # word_tokenize(text)
@@ -43,16 +44,29 @@ def unique_words(text):
 def most_frequent_words(text):
     return []
 
-def print_basic_metrics(text):
+def average_sentence_length(text, sentences):
+    return 1.0 * len(text) / len(sentences)
+
+def print_title_and_underline(title):
+    print(title + ":")
+    underline = "-" * len(title) + "-"
+    print(underline)
+
+def print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text):
     print("Word count: " + str(len(text)))
     print("Unique words: " + str(unique_words(text)))
-    print("Lexical diversity: " + str(lexical_diversity(text)))
+    print("Unique words (stemmed): " + str(unique_words(stemmed_text)))
+    print("Average sentence length: {0:.2f}".format(average_sentence_length(text, sentences)))
+    print("Lexical diversity: {0:.6f}".format(lexical_diversity(stemmed_text)))
 
 def main():
-    print("Basic Metrics:\n")
+    print_title_and_underline("Basic Metrics")
+    print("")
 
-    # Stores the text for each novel using title as key
+    # Stores the text (as a list of words) for each novel using title as key
     text_by_title = dict()
+    # Stores the text (as a list of sentences) for each novel using title as key
+    sentences_by_title = dict()
     # Stores stemmed text for each novel using title as key
     stemmed_text_by_title = dict()
     # Stores stemmed text with common words removed, for each novel, using title as key
@@ -72,11 +86,16 @@ def main():
     for filename in os.listdir(novels_dir):
         if filename.endswith(".txt"):
             curr_title = title_from_filename(filename)
-            print(curr_title + ":")
+            print_title_and_underline(curr_title)
             with open(novels_dir + "/" + filename, "r") as textfile:
                 # Creates a clean list of words in the novel, stores in text dictionary
                 text = clean_text(textfile)
                 text_by_title[curr_title] = text
+                # Creates a list of sentences in the novel, stores in dictionary
+                textfile.seek(0)    # Reset filestream
+                sentences = sent_tokenize(textfile.read().decode("utf-8"))
+                sentences_by_title[curr_title] = sentences
+                
                 # Creates a frequency distribution for the current title, stores in dictionary
                 freq_dist_by_title[curr_title] = FreqDist(text)
                 # Creates a list of stemmed words in the novel, stores in dictionary
@@ -85,7 +104,9 @@ def main():
                 stemmed_filtered_text_by_title[curr_title] = [w for w in text if not w in stop_words]
 
                 # Prints some of the basic metrics for the current text
-                print_basic_metrics(text)
+                stemmed_text = stemmed_text_by_title[curr_title]
+                stemmed_filtered_text = stemmed_filtered_text_by_title[curr_title]
+                print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text)
             print("")
 
         textfile.close()
