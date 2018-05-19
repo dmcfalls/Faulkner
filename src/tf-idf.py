@@ -12,12 +12,14 @@ from collections import defaultdict
 
 novels_dir = "./corpus/novels"
 
-filename = "1930-01_As_I_Lay_Dying.txt"
+# filename = "1930-01_As_I_Lay_Dying.txt"
+filename = "1929-02_The_Sound_and_the_Fury.txt"
 
-section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY"]
+# section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
+section_delimiters = ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
 
-# The Sound and The Fury: []
-# As I Lay Dying:  []
+# The Sound and The Fury: ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
+# As I Lay Dying:  ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
 
 # NOTES
 
@@ -29,6 +31,12 @@ section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PE
 # Light in August - TODO: look for sturctual indicators (numbered chapters? character names?)
 
 # In general: pass a list of section tokens to a function that divies up the text based on those tokens
+
+section_to_marker_converter = {"April Seventh, 1928.":"Benjy", "June Second, 1910.":"Quentin", "April Sixth, 1928.":"Jason", "April Eighth, 1928.":"Dilsey"}
+def section_to_marker(section):
+	if section in section_to_marker_converter.keys():
+		return section_to_marker_converter[section]
+	return section
 
 def clean_text(textfile):
   # Split into words separated by whitespace
@@ -46,14 +54,17 @@ def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
 	currSection = ""
 	# Populate documentFreqDicts going by sections of a document
 	for line in textfile:
-		if line.strip() in section_delimiters:
-			currSection = line.strip()
+		bareline = line.rstrip().lstrip()
+		if bareline in section_delimiters:
+			currSection = bareline
+			print(currSection)
 			continue
-		for word in line:
+		for word in line.split():
 			word = filter(str.isalnum, word).lower().strip()
 			if word == "":
 				continue
 			documentFreqDicts[currSection][word] += 1
+			# print("update freq of " + word + " in " + currSection + " to " + str(documentFreqDicts[currSection][word]))
 			all_words.add(word)
 	# Populate corpusFreqs by checking word counts across all sections
 	for word in all_words:
@@ -62,27 +73,23 @@ def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
 				corpusFreqs[word] += 1
 
 def tf(term, documentFreqs):
-	return documentFreqs[term]
-	# Below is the GOAL
 	if documentFreqs[term] == 0:
-		return 0
-	return 1 + math.log(documentFreqs[term])
+		return 0.0
+	return 1.0 + math.log(documentFreqs[term])
 
 def idf(term, corpusFreqs):
 	if corpusFreqs[term] == 0:
-		return 0
-	return 1.0 * len(section_delimiters) / corpusFreqs[term]
-	# Below is the GOAL
-	return math.log(1 + len(section_delimiters) / corpusFreqs[term])
+		return 0.0
+	return math.log(1 + 1.0 * len(section_delimiters) / corpusFreqs[term])
 
 def tfidf(term, documentFreqs, corpusFreqs):
 	return 1.0 * tf(term, documentFreqs) * idf(term, corpusFreqs)
 
 def print_highest_weight_terms(section, documentFreqDicts, corpusFreqs, all_words):
 	N = 20
-	topline = "Highest weighted terms in " + section + ":\n"
+	topline = "Highest weighted terms in " + section_to_marker(section) + ":\n"
 	print(topline)
-	print("  Words:   Weights:")
+	print("  Words:        Weights:")
 	tfidf_weights = dict()
 	for word in all_words:
 		tfidf_weights[word] = tfidf(word, documentFreqDicts[section], corpusFreqs)
@@ -108,7 +115,12 @@ def main():
 		textfile.seek(0)
 		all_words = set(clean_text(textfile))
 	# Print the highest weight terms for the desired section
-	print_highest_weight_terms("DEWEY DELL", documentFreqDicts, corpusFreqs, all_words)
+	for section in section_delimiters:
+		print_highest_weight_terms(section, documentFreqDicts, corpusFreqs, all_words)
+
+	# print_highest_weight_terms("DEWEY DELL", documentFreqDicts, corpusFreqs, all_words)
+	# print_highest_weight_terms("DARL", documentFreqDicts, corpusFreqs, all_words)
+	# print_highest_weight_terms("ANSE", documentFreqDicts, corpusFreqs, all_words)
 
 if __name__ == "__main__":
   main()
