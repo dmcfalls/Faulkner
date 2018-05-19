@@ -6,6 +6,7 @@ import nltk
 import os
 import io
 import string
+import math
 
 from collections import defaultdict
 
@@ -41,7 +42,7 @@ def clean_text(textfile):
   return text
 
 def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
-	allwords = set()
+	all_words = set()
 	currSection = ""
 	# Populate documentFreqDicts going by sections of a document
 	for line in textfile:
@@ -53,21 +54,46 @@ def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
 			if word == "":
 				continue
 			documentFreqDicts[currSection][word] += 1
-			allwords.add(word)
+			all_words.add(word)
 	# Populate corpusFreqs by checking word counts across all sections
-	for word in allwords:
+	for word in all_words:
 		for section in section_delimiters:
 			if documentFreqDicts[section][word] > 0:
 				corpusFreqs[word] += 1
 
 def tf(term, documentFreqs):
-	return 1 + log(documentFreqs[term])
+	return documentFreqs[term]
+	# Below is the GOAL
+	if documentFreqs[term] == 0:
+		return 0
+	return 1 + math.log(documentFreqs[term])
 
 def idf(term, corpusFreqs):
-	return log(1 + len(section_delimiters) / corpusFreqs[term])
+	if corpusFreqs[term] == 0:
+		return 0
+	return 1.0 * len(section_delimiters) / corpusFreqs[term]
+	# Below is the GOAL
+	return math.log(1 + len(section_delimiters) / corpusFreqs[term])
 
 def tfidf(term, documentFreqs, corpusFreqs):
-	return tf(term, documentFreqs) * idf(term, corpusFreqs)
+	return 1.0 * tf(term, documentFreqs) * idf(term, corpusFreqs)
+
+def print_highest_weight_terms(section, documentFreqDicts, corpusFreqs, all_words):
+	N = 20
+	topline = "Highest weighted terms in " + section + ":\n"
+	print(topline)
+	print("  Words:   Weights:")
+	tfidf_weights = dict()
+	for word in all_words:
+		tfidf_weights[word] = tfidf(word, documentFreqDicts[section], corpusFreqs)
+	terms_by_weight = reversed(sorted(tfidf_weights.iteritems(), key = lambda (k,v): (v, k)))
+	count = 0
+	for key, value in terms_by_weight:
+		print("  " + key + "        " + str(value))
+		count += 1
+		if(count == N):
+			break
+	print("-" * len(topline))
 
 def main():
 	print("TF-IDF Module:")
@@ -76,11 +102,13 @@ def main():
 	# Creates a dictionary of word:("freq in document") for each document with a section delimiter
 	# e.g. documentFreqDicts[delimiter][word] returns the frequency of the 'word' in the section delimited by 'delimiter'
 	documentFreqDicts = defaultdict(lambda: defaultdict(lambda: 0))
+	all_words = set()
 	with open(novels_dir + "/" + filename, "r") as textfile:
 		populateFreqDicts(textfile, documentFreqDicts, corpusFreqs)
-
-
-
+		textfile.seek(0)
+		all_words = set(clean_text(textfile))
+	# Print the highest weight terms for the desired section
+	print_highest_weight_terms("DEWEY DELL", documentFreqDicts, corpusFreqs, all_words)
 
 if __name__ == "__main__":
   main()
