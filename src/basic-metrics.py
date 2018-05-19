@@ -15,11 +15,12 @@ novels_dir = "./corpus/novels"
 def clean_text(textfile):
     # Split into words separated by whitespace
     text = [word for line in textfile for word in line.split()]
-    # Remove punctuation
-    trans_table = string.maketrans(string.punctuation, " " * len(string.punctuation))
-    text = [word.translate(trans_table).strip() for word in text]
+    # Remove non-punctuation and non-alphanumeric characters
+    text = [filter(str.isalnum, word) for word in text]
     # Normalize to lower-case
     text = [word.lower() for word in text]
+    # Remove blanks and blank spaces, remove whitespace from words
+    text = [word.strip() for word in text if word != "" and word != " "]
     return text
 
 def title_from_filename(filename):
@@ -41,8 +42,9 @@ def lexical_diversity(text):
 def unique_words(text):
     return len(set(text))
 
-def most_frequent_words(text):
-    return []
+def most_frequent_words(freq_dist):
+    N = 20
+    return freq_dist.most_common(N)
 
 def average_sentence_length(text, sentences):
     return 1.0 * len(text) / len(sentences)
@@ -59,6 +61,10 @@ def print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text):
     print("Unique words (stemmed): " + str(unique_words(stemmed_text)))
     print("Average sentence length: {0:.2f}".format(average_sentence_length(text, sentences)))
     print("Lexical diversity: {0:.6f}".format(lexical_diversity(stemmed_text)))
+
+def print_most_frequent_words(freq_dist):
+    for (word, freq) in most_frequent_words(freq_dist):
+        print("  " + word + " (" + str(freq) + ")")
 
 def main():
     print_title_and_underline("Basic Metrics")
@@ -107,7 +113,16 @@ def main():
                 # Prints some of the basic metrics for the current text
                 stemmed_text = stemmed_text_by_title[curr_title]
                 stemmed_filtered_text = stemmed_filtered_text_by_title[curr_title]
+                
+                # Specialized frequency distributions 
+                stemmed_freq_dist_by_title[curr_title] = FreqDist(stemmed_text)
+                stemmed_filtered_freq_dist_by_title[curr_title] = FreqDist(stemmed_filtered_text)
+
                 print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text)
+                print("Most frequent words:")
+                print_most_frequent_words(freq_dist_by_title[curr_title])
+                print("Most frequent words (stemmed & filtered):")
+                print_most_frequent_words(stemmed_filtered_freq_dist_by_title[curr_title])
             print("")
 
         textfile.close()
