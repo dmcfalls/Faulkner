@@ -11,8 +11,8 @@ char_names_dir = "./resources/character_names"
 female_character_names_file = "female_character_names.txt"
 male_character_names_file = "male_character_names.txt"
 
-fem_markers = ["she", "her", "hers", "herself", "mrs", "ms", "miss", "woman", "girl", "lady", "queen", "princess", "male", "masculine", "captain", "father", "son"]
-masc_markers = ["he", "him", "his", "himself", "mr", "man", "boy", "gentleman", "king", "prince", "female", "feminine", "mother", "daughter"]
+fem_markers = ["she", "her", "hers", "herself", "mrs", "ms", "miss", "woman", "girl", "lady", "queen", "princess", "female", "feminine", "mother", "daughter", "wife", "aunt", "auntie", "belle"]
+masc_markers = ["he", "him", "his", "himself", "mr", "man", "boy", "gentleman", "king", "prince", "male", "masculine", "captain", "colonel", "father", "son", "husband", "uncle"]
 
 def char_names_from_path(path):
 	with open(path, "r") as textfile:
@@ -53,7 +53,7 @@ def print_title_and_underline(title):
   print(underline)
 
 # Returns a pair (femme_percent, masc_percent) given a text
-def generate_gender_percentages(text):
+def generate_gender_percentages(text, title):
 	fem_words = 0
 	masc_words = 0
 	total_words = 0
@@ -75,7 +75,7 @@ def generate_gender_percentages(text):
 
 # Returns a pair (femme_percent, masc_percent) given a text
 # Stricter than the naive algorithm above: requires words fall between two markers of the same kind
-def generate_gender_percentages_strict(text):
+def generate_gender_percentages_strict(text, title):
 	fem_words = 0
 	masc_words = 0
 	total_words = 0
@@ -132,11 +132,11 @@ def main():
 			print_title_and_underline(curr_title)
 			with open(novels_dir + "/" + filename, "r") as textfile:
 				text = clean_text(textfile)
-				(femme_percent, masc_percent) = generate_gender_percentages(text)
+				(femme_percent, masc_percent) = generate_gender_percentages(text, curr_title)
 				print("Fem%: {0:.2f}".format(femme_percent))
 				print("Masc%: {0:.2f}".format(masc_percent))
 				print("")
-				(femme_percent, masc_percent) = generate_gender_percentages_strict(text)
+				(femme_percent, masc_percent) = generate_gender_percentages_strict(text, curr_title)
 				print("Fem% (strict): {0:.2f}".format(femme_percent))
 				print("Masc% (strict): {0:.2f}".format(masc_percent))
 				print("")
