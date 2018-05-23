@@ -12,11 +12,11 @@ from collections import defaultdict
 
 novels_dir = "./corpus/novels"
 
-# filename = "1930-01_As_I_Lay_Dying.txt"
-filename = "1929-02_The_Sound_and_the_Fury.txt"
-
-# section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
-section_delimiters = ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
+filename = "1930-01_As_I_Lay_Dying.txt"
+# filename = "1929-02_The_Sound_and_the_Fury.txt"
+ 
+section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
+# section_delimiters = ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
 
 # The Sound and The Fury: ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
 # As I Lay Dying:  ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
@@ -32,12 +32,6 @@ section_delimiters = ["April Seventh, 1928.", "June Second, 1910.", "April Sixth
 
 # In general: pass a list of section tokens to a function that divies up the text based on those tokens
 
-section_to_marker_converter = {"April Seventh, 1928.":"Benjy", "June Second, 1910.":"Quentin", "April Sixth, 1928.":"Jason", "April Eighth, 1928.":"Dilsey"}
-def section_to_marker(section):
-	if section in section_to_marker_converter.keys():
-		return section_to_marker_converter[section]
-	return section
-
 def clean_text(textfile):
   # Split into words separated by whitespace
   text = [word for line in textfile for word in line.split()]
@@ -45,9 +39,15 @@ def clean_text(textfile):
   text = [filter(str.isalnum, word) for word in text]
   # Normalize to lower-case
   text = [word.lower() for word in text]
-  # Remove blanks and blank spaces
-  text = [word for word in text if word != "" and word != " "]
+  # Remove blanks and blank spaces, remove whitespace from words
+  text = [word.strip() for word in text if word != "" and word != " "]
   return text
+
+section_to_marker_converter = {"April Seventh, 1928.":"Benjy", "June Second, 1910.":"Quentin", "April Sixth, 1928.":"Jason", "April Eighth, 1928.":"Dilsey"}
+def section_to_marker(section):
+	if section in section_to_marker_converter.keys():
+		return section_to_marker_converter[section]
+	return section
 
 def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
 	all_words = set()
@@ -57,7 +57,7 @@ def populateFreqDicts(textfile, documentFreqDicts, corpusFreqs):
 		bareline = line.rstrip().lstrip()
 		if bareline in section_delimiters:
 			currSection = bareline
-			print(currSection)
+			# print(currSection)
 			continue
 		for word in line.split():
 			word = filter(str.isalnum, word).lower().strip()
@@ -86,24 +86,24 @@ def tfidf(term, documentFreqs, corpusFreqs):
 	return 1.0 * tf(term, documentFreqs) * idf(term, corpusFreqs)
 
 def print_highest_weight_terms(section, documentFreqDicts, corpusFreqs, all_words):
-	N = 20
-	topline = "Highest weighted terms in " + section_to_marker(section) + ":\n"
+	N = 30
+	topline = "Highest weighted terms in " + section_to_marker(section) + " section(s):\n"
 	print(topline)
-	print("  Words:        Weights:")
+	print("Words:          Weights:")
 	tfidf_weights = dict()
 	for word in all_words:
 		tfidf_weights[word] = tfidf(word, documentFreqDicts[section], corpusFreqs)
 	terms_by_weight = reversed(sorted(tfidf_weights.iteritems(), key = lambda (k,v): (v, k)))
 	count = 0
 	for key, value in terms_by_weight:
-		print("  " + key + "        " + str(value))
+		print("{:<15} {:<15}".format(key, value))
 		count += 1
 		if(count == N):
 			break
-	print("-" * len(topline))
+	print("-" * len(topline) + "\n")
 
 def main():
-	print("TF-IDF Module:")
+	print("TF-IDF Analysis Module:\n")
 	# Creates a dictionary of word:("number of texts word appears in")
 	corpusFreqs = defaultdict(lambda: 0)
 	# Creates a dictionary of word:("freq in document") for each document with a section delimiter

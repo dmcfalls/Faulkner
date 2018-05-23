@@ -10,7 +10,7 @@ import re
 pathname = "./corpus/novels/1926-01_Soldiers_Pay.txt"
 output = "./out.txt"
 
-lexicon_path = "./resources/english-dictionary-umich.txt"
+lexicon_path = "./resources/dictionaries/english-dictionary-umich.txt"
 
 def get_dictionary():
 	with open(lexicon_path, "r") as file:

@@ -119,13 +119,12 @@ def main():
                 stemmed_filtered_freq_dist_by_title[curr_title] = FreqDist(stemmed_filtered_text)
 
                 print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text)
-                print("Most frequent words:")
-                print_most_frequent_words(freq_dist_by_title[curr_title])
+                # print("Most frequent words:")
+                # print_most_frequent_words(freq_dist_by_title[curr_title])
                 print("Most frequent words (stemmed & filtered):")
                 print_most_frequent_words(stemmed_filtered_freq_dist_by_title[curr_title])
             print("")
-
-        textfile.close()
+            textfile.close()
 
 if __name__ == "__main__":
     main()
