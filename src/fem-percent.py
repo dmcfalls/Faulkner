@@ -11,8 +11,8 @@ char_names_dir = "./resources/character_names"
 female_character_names_file = "female_character_names.txt"
 male_character_names_file = "male_character_names.txt"
 
-fem_markers = ["she", "her", "hers", "herself", "mrs", "ms", "miss", "woman", "girl", "lady", "queen", "princess", "female", "feminine", "mother", "daughter", "wife", "aunt", "auntie", "belle"]
-masc_markers = ["he", "him", "his", "himself", "mr", "man", "boy", "gentleman", "king", "prince", "male", "masculine", "captain", "colonel", "father", "son", "husband", "uncle"]
+fem_markers = ["she", "her", "hers", "herself", "mrs", "ms", "miss", "mme", "madame", "woman", "girl", "lady", "queen", "princess", "female", "feminine", "mother", "daughter", "wife", "aunt", "auntie", "belle", "granny", "mom"]
+masc_markers = ["he", "him", "his", "himself", "mr", "man", "reverend", "boy", "gentleman", "king", "prince", "male", "masculine", "captain", "colonel", "father", "son", "husband", "uncle", "dad"]
 
 def char_names_from_path(path):
 	with open(path, "r") as textfile:
@@ -52,6 +52,14 @@ def print_title_and_underline(title):
   underline = "-" * len(title) + "-"
   print(underline)
 
+def is_fem_token(word, fem_markers, fem_characters):
+	if word in fem_markers or word in fem_characters:
+		return true
+
+def is_masc_token(word, masc_markers, male_characters):
+	if word in masc_markers or word in male_characters:
+		return true
+
 # Returns a pair (femme_percent, masc_percent) given a text
 def generate_gender_percentages(text, title):
 	fem_words = 0
@@ -60,9 +68,9 @@ def generate_gender_percentages(text, title):
 	# curr_gender can be either "masc" or "fem", refers to last marker/character seen
 	curr_gender = "masc"
 	for word in text:
-		if word in fem_markers or word in fem_characters:
-			curr_gender = "fem"
-		elif word in masc_markers or word in male_characters:
+		if is_fem_token(word, fem_markers, fem_characters):
+			curr_gneder = "fem"
+		elif is_masc_token(word, masc_markers, male_characters):
 			curr_gender = "masc"
 		if curr_gender == "fem":
 			fem_words += 1
@@ -85,9 +93,9 @@ def generate_gender_percentages_strict(text, title):
 	words_since_last_change = 0
 	for word in text:
 		# Assign gender to current word
-		if word in fem_markers or word in fem_characters:
-			curr_gender = "fem"
-		elif word in masc_markers or word in male_characters:
+		if is_fem_token(word, fem_markers, fem_characters):
+			curr_gneder = "fem"
+		elif is_masc_token(word, masc_markers, male_characters):
 			curr_gender = "masc"
 		else:
 			curr_gender = "neut"
@@ -122,6 +130,9 @@ def generate_gender_statistics(text):
 		elif word in male_characters:
 			male_names_ct += 1
 	return (fem_marker_ct, masc_marker_ct, fem_names_ct, male_names_ct)
+
+def calculate_gender_ratios():
+	return 0
 
 def main():
 	print("Percentage text bounded by female identifiers:")
