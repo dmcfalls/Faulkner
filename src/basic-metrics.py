@@ -46,8 +46,27 @@ def most_frequent_words(freq_dist):
     N = 20
     return freq_dist.most_common(N)
 
+def average_word_length(text):
+    totalChars = 0
+    for word in text:
+        totalChars += len(word)
+    return 1.0 * totalChars / len(text)
+
 def average_sentence_length(text, sentences):
     return 1.0 * len(text) / len(sentences)
+
+def pos_percent(count, text):
+    return 1.0 * count / len(text)
+
+def part_of_speech_metrics(text):
+    tagged_text = nltk.pos_tag(text, tagset = 'universal')
+    tagged_fd = nltk.FreqDist(tag for (word, tag) in tagged_text)
+    noun_pct = pos_percent(tagged_fd["NOUN"], text)
+    verb_pct = pos_percent(tagged_fd["VERB"], text)
+    adj_pct = pos_percent(tagged_fd["ADJ"], text)
+    adv_pct = pos_percent(tagged_fd["ADV"], text)
+    pron_pct = pos_percent(tagged_fd["PRON"], text)
+    return (noun_pct, verb_pct, adj_pct, adv_pct, pron_pct)
 
 def print_title_and_underline(title):
     print(title + ":")
@@ -59,12 +78,21 @@ def print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text):
     print("Sentence count: " + str(len(sentences)))
     print("Unique words: " + str(unique_words(text)))
     print("Unique words (stemmed): " + str(unique_words(stemmed_text)))
+    print("Average word length: {0:.3f}".format(average_word_length(text)))
     print("Average sentence length: {0:.2f}".format(average_sentence_length(text, sentences)))
     print("Lexical diversity: {0:.6f}".format(lexical_diversity(stemmed_text)))
 
 def print_most_frequent_words(freq_dist):
     for (word, freq) in most_frequent_words(freq_dist):
         print("  " + word + " (" + str(freq) + ")")
+
+def print_part_of_speech_data(text):
+    (n, v, adj, adv, prn) = part_of_speech_metrics(text)
+    print("  Noun%: {0:.3f}".format(n))
+    print("  Verb%: {0:.3f}".format(v))
+    print("  Adjective%: {0:.3f}".format(adj))
+    print("  Adverb%: {0:.3f}".format(adv))
+    print("  Pronoun%: {0:.3f}".format(prn))
 
 def main():
     print_title_and_underline("Basic Metrics")
@@ -121,6 +149,8 @@ def main():
                 print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text)
                 # print("Most frequent words:")
                 # print_most_frequent_words(freq_dist_by_title[curr_title])
+                print("Part of speech percentages:")
+                print_part_of_speech_data(text)
                 print("Most frequent words (stemmed & filtered):")
                 print_most_frequent_words(stemmed_filtered_freq_dist_by_title[curr_title])
             print("")
