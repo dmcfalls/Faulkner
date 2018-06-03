@@ -5,12 +5,18 @@ import os
 import io
 import string
 
+import spacy
+import en_core_web_sm
+
 from nltk.tokenize import word_tokenize         # word_tokenize(text)
 from nltk.tokenize import sent_tokenize         # sent_tokenize(text)
-from nltk.stem.porter import PorterStemmer      # PorterStemmer
-from nltk.probability import FreqDist           # FreqDist
+from nltk.stem.porter import PorterStemmer      # PorterStemmer()
+from nltk.probability import FreqDist           # FreqDist()
+from nltk.tree import Tree                      # Tree()
 
 novels_dir = "./corpus/novels"
+
+en_nlp = en_core_web_sm.load()
 
 def clean_text(textfile):
     # Split into words separated by whitespace
@@ -68,11 +74,39 @@ def part_of_speech_metrics(text):
     pron_pct = pos_percent(tagged_fd["PRON"], text)
     return (noun_pct, verb_pct, adj_pct, adv_pct, pron_pct)
 
+# Given a tree from spacy's en_nlp(), convert into an NLTK Tree object
+# From this stackoverflow post: https://stackoverflow.com/questions/36610179/how-to-get-the-dependency-tree-with-spacy
+def to_nltk_tree(node):
+    if node.n_lefts + node.n_rights > 0:
+        return Tree(node.orth_, [to_nltk_tree(child) for child in node.children])
+    else:
+        return Tree(node.orth_, [])
+
+# Reports the depth of the deepest node in the given NLTK Tree object
+def tree_depth(tree):
+    return max(len(pos) for pos in tree.treepositions())
+
 # parse the sentences into CFG trees and report the average depth of the tree as a measure of sentences complexity
+# TODO: implement
 def average_tree_depth(sentences):
+    total_depths = 0
+    n_sentences = 0
     for sentence in sentences:
-        # TODO: implement
-        return 1.0
+        doc = en_nlp(sentence)
+        for sent in doc.sents:
+            total_depths += tree_depth(to_nltk_tree(sent.root))
+            n_sentences += 1
+    return 1.0 * total_depths / n_sentences
+
+# reports the average size of a chunk of text; can give insight into how much ideas are modified
+# TODO: implement
+def average_chunk_size(sentences):
+    return 1.0
+
+def sentence_complexity_metrics(text, sentences):
+    atd = average_tree_depth(sentences)
+    acs = average_chunk_size(sentences)
+    return (atd, acs)
 
 def print_title_and_underline(title):
     print(title + ":")
@@ -99,6 +133,11 @@ def print_part_of_speech_data(text):
     print("  Adjective%: {0:.3f}".format(adj))
     print("  Adverb%: {0:.3f}".format(adv))
     print("  Pronoun%: {0:.3f}".format(prn))
+
+def print_sentence_complexity_data(text, sentences):
+    (atd, acs) = sentence_complexity_metrics(text, sentences)
+    print("Average sentence tree depth: {0:.3f}".format(atd))
+    print("Average sentence component chunk size (unfinished): {0:.3f}".format(acs))
 
 def main():
     print_title_and_underline("Basic Metrics")
@@ -155,8 +194,10 @@ def main():
                 print_basic_metrics(text, sentences, stemmed_text, stemmed_filtered_text)
                 # print("Most frequent words:")
                 # print_most_frequent_words(freq_dist_by_title[curr_title])
-                print("Part of speech percentages:")
-                print_part_of_speech_data(text)
+                #print("Part of speech percentages:")
+                #print_part_of_speech_data(text)
+                print("Sentence complexity metrics:")
+                print_sentence_complexity_data(text, sentences)
                 print("Most frequent words (stemmed & filtered):")
                 print_most_frequent_words(stemmed_filtered_freq_dist_by_title[curr_title])
             print("")

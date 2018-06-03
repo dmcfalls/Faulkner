@@ -131,6 +131,8 @@ def generate_gender_statistics(text):
 			male_names_ct += 1
 	return (fem_marker_ct, masc_marker_ct, fem_names_ct, male_names_ct)
 
+# Returns meaningful statistics (to be decided upon) related to gender in the text
+# TODO: implement
 def calculate_gender_ratios():
 	return 0
 
