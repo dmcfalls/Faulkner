@@ -68,6 +68,12 @@ def part_of_speech_metrics(text):
     pron_pct = pos_percent(tagged_fd["PRON"], text)
     return (noun_pct, verb_pct, adj_pct, adv_pct, pron_pct)
 
+# parse the sentences into CFG trees and report the average depth of the tree as a measure of sentences complexity
+def average_tree_depth(sentences):
+    for sentence in sentences:
+        # TODO: implement
+        return 1.0
+
 def print_title_and_underline(title):
     print(title + ":")
     underline = "-" * len(title) + "-"

@@ -52,13 +52,13 @@ def print_title_and_underline(title):
   underline = "-" * len(title) + "-"
   print(underline)
 
-def is_fem_token(word, fem_markers, fem_characters):
+def is_fem_token(word):
 	if word in fem_markers or word in fem_characters:
-		return true
+		return True
 
-def is_masc_token(word, masc_markers, male_characters):
+def is_masc_token(word):
 	if word in masc_markers or word in male_characters:
-		return true
+		return True
 
 # Returns a pair (femme_percent, masc_percent) given a text
 def generate_gender_percentages(text, title):
@@ -68,9 +68,9 @@ def generate_gender_percentages(text, title):
 	# curr_gender can be either "masc" or "fem", refers to last marker/character seen
 	curr_gender = "masc"
 	for word in text:
-		if is_fem_token(word, fem_markers, fem_characters):
-			curr_gneder = "fem"
-		elif is_masc_token(word, masc_markers, male_characters):
+		if is_fem_token(word):
+			curr_gender = "fem"
+		elif is_masc_token(word):
 			curr_gender = "masc"
 		if curr_gender == "fem":
 			fem_words += 1
@@ -93,9 +93,9 @@ def generate_gender_percentages_strict(text, title):
 	words_since_last_change = 0
 	for word in text:
 		# Assign gender to current word
-		if is_fem_token(word, fem_markers, fem_characters):
-			curr_gneder = "fem"
-		elif is_masc_token(word, masc_markers, male_characters):
+		if is_fem_token(word):
+			curr_gender = "fem"
+		elif is_masc_token(word):
 			curr_gender = "masc"
 		else:
 			curr_gender = "neut"
