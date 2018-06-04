@@ -1,13 +1,15 @@
+# -*- coding: utf-8 -*-
+
 # This script removes lines with isolated titles, page numbers, and blank lines
 
 import nltk
 import re
 import os
 
-pathname = "./corpus/novels/1959-01_The_Mansion.txt"
+pathname = "./corpus/novels/1926-01_Soldiers_Pay.txt"
 output = "./out.txt"
 
-title = "THE MANSION"
+title = "SOLDIERS^ PAY"
 author = "WILLIAM FAULKNER"
 
 beginLine = 10
@@ -28,7 +30,7 @@ def main():
                 else:
                     blankline = False
                     # Remove lines that only contain title or page number
-                    titleInLine = (title.lower() in line.lower())
+                    titleInLine = (title in line)
                     authorInLine = (author.lower() in line.lower())
                     if ((titleInLine or authorInLine) and currLine > beginLine) or re.match("^[0-9*]+$", line.strip()):
                         skipline = True
