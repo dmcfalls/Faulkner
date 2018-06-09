@@ -77,9 +77,9 @@ def generate_gender_percentages(text, title):
 		elif curr_gender == "masc":
 			masc_words += 1
 		total_words += 1
-	femme_percent = 1.0 * fem_words / total_words * 100
+	fem_percent = 1.0 * fem_words / total_words * 100
 	masc_percent = 1.0 * masc_words / total_words * 100
-	return (femme_percent, masc_percent)
+	return (fem_percent, masc_percent)
 
 # Returns a pair (femme_percent, masc_percent) given a text
 # Stricter than the naive algorithm above: requires words fall between two markers of the same kind
@@ -110,9 +110,9 @@ def generate_gender_percentages_strict(text, title):
 			words_since_last_change = 0
 		words_since_last_change += 1
 		total_words += 1
-	femme_percent = 1.0 * fem_words / total_words * 100
+	fem_percent = 1.0 * fem_words / total_words * 100
 	masc_percent = 1.0 * masc_words / total_words * 100
-	return (femme_percent, masc_percent)
+	return (fem_percent, masc_percent)
 
 # Returns the raw counts of feminine/masculine marker words and female/male names
 def generate_gender_statistics(text):
@@ -131,10 +131,45 @@ def generate_gender_statistics(text):
 			male_names_ct += 1
 	return (fem_marker_ct, masc_marker_ct, fem_names_ct, male_names_ct)
 
+def fem_to_masc_marker_ratio(fem_marker_ct, masc_marker_ct):
+	return 1.0 * fem_marker_ct / masc_marker_ct
+
+def fem_to_male_name_ratio(fem_name_ct, male_name_ct):
+	return 1.0 * fem_name_ct / male_name_ct
+
+# Indicates how often female names are used relative to marker words (higher number indicates names used more often)
+def fem_name_to_marker_ratio(fem_name_ct, fem_marker_ct):
+	return 1.0 * fem_name_ct / fem_marker_ct
+
+# Indicates how often male names are used relative to marker words (higher number indicates names used more often)
+def male_name_to_marker_ratio(male_name_ct, masc_marker_ct):
+	return 1.0 * male_name_ct / masc_marker_ct
+
+def fem_weighted_score(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent):
+	total_fem_ct = fem_marker_ct + fem_name_ct
+	total_fm_word_ct = fem_marker_ct + fem_name_ct + masc_marker_ct + male_name_ct
+	total_text_percent = fem_percent + masc_percent
+	return 0.5 * total_fem_ct / total_fm_word_ct + 0.5 * fem_percent / total_text_percent
+
+def male_weighted_score(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent):
+	total_masc_ct = masc_marker_ct + male_name_ct
+	total_fm_word_ct = fem_marker_ct + fem_name_ct + masc_marker_ct + male_name_ct
+	total_text_percent = fem_percent + masc_percent
+	return 0.5 * total_masc_ct / total_fm_word_ct + 0.5 * masc_percent / total_text_percent
+
+def fem_to_male_weighted_ratio(fem_score, masc_score):
+	return 1.0 * fem_score / masc_score
+
 # Returns meaningful statistics (to be decided upon) related to gender in the text
-# TODO: implement
-def calculate_gender_ratios():
-	return 0
+def calculate_gender_ratios(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent):
+	ftmmr = fem_to_masc_marker_ratio(fem_marker_ct, masc_marker_ct)
+	ftmnr = fem_to_male_name_ratio(fem_name_ct, male_name_ct)
+	fntmr = fem_name_to_marker_ratio(fem_name_ct, fem_marker_ct)
+	mntmr = male_name_to_marker_ratio(male_name_ct, masc_marker_ct)
+	fws = fem_weighted_score(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent)
+	mws = male_weighted_score(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent)
+	ftmwr = fem_to_male_weighted_ratio(fws, mws)
+	return (ftmmr, ftmnr, fntmr, mntmr, fws, mws, ftmwr)
 
 def main():
 	print("Percentage text bounded by female identifiers:")
@@ -145,19 +180,28 @@ def main():
 			print_title_and_underline(curr_title)
 			with open(novels_dir + "/" + filename, "r") as textfile:
 				text = clean_text(textfile)
-				(femme_percent, masc_percent) = generate_gender_percentages(text, curr_title)
-				print("Fem%: {0:.2f}".format(femme_percent))
+				(fem_percent, masc_percent) = generate_gender_percentages(text, curr_title)
+				print("Fem%: {0:.2f}".format(fem_percent))
 				print("Masc%: {0:.2f}".format(masc_percent))
 				print("")
-				(femme_percent, masc_percent) = generate_gender_percentages_strict(text, curr_title)
-				print("Fem% (strict): {0:.2f}".format(femme_percent))
-				print("Masc% (strict): {0:.2f}".format(masc_percent))
+				(fem_percent_strict, masc_percent_strict) = generate_gender_percentages_strict(text, curr_title)
+				print("Fem% (strict): {0:.2f}".format(fem_percent_strict))
+				print("Masc% (strict): {0:.2f}".format(masc_percent_strict))
 				print("")
-				(fem_marker_ct, masc_marker_ct, fem_names_ct, male_names_ct) = generate_gender_statistics(text)
+				(fem_marker_ct, masc_marker_ct, fem_name_ct, male_name_ct) = generate_gender_statistics(text)
 				print("Female marker words: {}".format(fem_marker_ct))
 				print("Male marker words: {}".format(masc_marker_ct))
-				print("Female names: {}".format(fem_names_ct))
-				print("Male names: {}".format(male_names_ct))
+				print("Female names: {}".format(fem_name_ct))
+				print("Male names: {}".format(male_name_ct))
+				print("")
+				(ftmmr, ftmnr, fntmr, mntmr, fws, mws, ftmwr) = calculate_gender_ratios(fem_marker_ct, fem_name_ct, masc_marker_ct, male_name_ct, fem_percent, masc_percent)
+				print("Fem to masc marker ratio: {0:.3f}".format(ftmmr))
+				print("Fem to male name ratio: {0:.3f}".format(ftmnr))
+				print("Fem name to marker ratio: {0:.3f}".format(fntmr))
+				print("Masc name to marker ratio: {0:.3f}".format(mntmr))
+				print("Female weighted score: {0:.3f}".format(fws))
+				print("Male weighted score: {0:.3f}".format(mws))
+				print("Female-to-male weighted ratio: {0:.3f}".format(ftmwr))
 			textfile.close()
 			print("")
 

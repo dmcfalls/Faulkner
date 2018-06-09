@@ -12,11 +12,11 @@ from collections import defaultdict
 
 novels_dir = "./corpus/novels"
 
-filename = "1930-01_As_I_Lay_Dying.txt"
 # filename = "1929-02_The_Sound_and_the_Fury.txt"
- 
-section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
+filename = "1930-01_As_I_Lay_Dying.txt"
+
 # section_delimiters = ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
+section_delimiters = ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
 
 # The Sound and The Fury: ["April Seventh, 1928.", "June Second, 1910.", "April Sixth, 1928.", "April Eighth, 1928."]
 # As I Lay Dying:  ["DARL", "CORA", "JEWEL", "DEWEY DELL", "TULL", "ANSE", "PEABODY", "VARDAMAN", "CASH", "SAMSON", "ADDIE", "WHITFIELD", "ARMSTID", "MOSELEY", "MACGOWAN"]
@@ -117,10 +117,6 @@ def main():
 	# Print the highest weight terms for the desired section
 	for section in section_delimiters:
 		print_highest_weight_terms(section, documentFreqDicts, corpusFreqs, all_words)
-
-	# print_highest_weight_terms("DEWEY DELL", documentFreqDicts, corpusFreqs, all_words)
-	# print_highest_weight_terms("DARL", documentFreqDicts, corpusFreqs, all_words)
-	# print_highest_weight_terms("ANSE", documentFreqDicts, corpusFreqs, all_words)
 
 if __name__ == "__main__":
   main()
