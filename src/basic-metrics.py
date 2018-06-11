@@ -19,12 +19,12 @@ import en_core_web_sm                           # English interface for spacy
 
 # from stanfordcorenlp import StanfordCoreNLP     # Yet another NLP suite used for dependency parsing
 
-OUTPUT_CSVFILE = False
-VERBOSE = True
+OUTPUT_CSVFILE = True
+VERBOSE = False
 
-novels_dir = "./corpus/novels"                  # Faulkner's novels corpus
+# novels_dir = "./corpus/novels"                # Faulkner's novels corpus
 # novels_dir = "./corpus/higher_brow"           # Faulkner's modernist contemporaries
-# novels_dir = "./corpus/lower_brow"            # Dime novels from the early 1900's
+novels_dir = "./corpus/lower_brow"            # Dime novels from the early 1900's
 # novels_dir = "./corpus/miscellaneous"         # Other interesting novels, unrelated to project
 
 output_filename = "./output.csv"
@@ -221,7 +221,7 @@ def write_headers_to_file(filename):
     with open(filename, "a") as output_file:
         writer = csv.writer(output_file)
         writer.writerow(headers)
-        print("Wrote headers to csv file")
+        print("Wrote headers to csv file\n")
 
 def write_data_to_file(data, filename):
     with open(filename, "a") as output_file:

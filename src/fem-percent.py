@@ -14,7 +14,11 @@ male_character_names_file = "male_character_names.txt"
 fem_markers = ["she", "her", "hers", "herself", "mrs", "ms", "miss", "mme", "madame", "woman", "girl", "lady", "queen", "princess", "female", "feminine", "mother", "daughter", "wife", "aunt", "auntie", "belle", "granny", "mom"]
 masc_markers = ["he", "him", "his", "himself", "mr", "man", "reverend", "boy", "gentleman", "king", "prince", "male", "masculine", "captain", "colonel", "father", "son", "husband", "uncle", "dad"]
 
+USE_CHARACTER_NAMES = True
+
 def char_names_from_path(path):
+	if(not USE_CHARACTER_NAMES):
+		return set([])
 	with open(path, "r") as textfile:
 		names = [line for line in textfile]
 		names = [word.lower().strip() for word in names]

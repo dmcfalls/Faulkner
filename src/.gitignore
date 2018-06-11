@@ -1,2 +1,3 @@
-results
+results/tf-idf*
 resources/stanford*
+corpus/lower_brow_extended
