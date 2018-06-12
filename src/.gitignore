@@ -1,5 +1,6 @@
 results/tf-idf*
 results/fem-percent*
+results/basic-metrics*
 resources/stanford*
 corpus/lower_brow_extended
 corpus/dime_novels_corpus
