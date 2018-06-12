@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This script attempts to correct basic transcription errors in texts
 # generated with OCR
 

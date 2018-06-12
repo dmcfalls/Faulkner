@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This program conducts TF-IDF Analysis on a text given some input information
 # tf is defined as the frequency of a term in a particular text/document
 # idf is defined as the number of texts/documents divided by the number of texts/documents in which the term appears
