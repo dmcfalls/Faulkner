@@ -17,14 +17,14 @@ from nltk.tree import Tree                      # Tree()
 import spacy                                    # Another NLP suite that offers sentence parsing
 import en_core_web_sm                           # English interface for spacy
 
-# from stanfordcorenlp import StanfordCoreNLP     # Yet another NLP suite used for dependency parsing
+from stanfordcorenlp import StanfordCoreNLP     # Yet another NLP suite used for dependency parsing
 
-OUTPUT_CSVFILE = True
-VERBOSE = False
+OUTPUT_CSVFILE = False
+VERBOSE = True
 
-# novels_dir = "./corpus/novels"                # Faulkner's novels corpus
+novels_dir = "./corpus/novels"                  # Faulkner's novels corpus
 # novels_dir = "./corpus/higher_brow"           # Faulkner's modernist contemporaries
-novels_dir = "./corpus/lower_brow"            # Dime novels from the early 1900's
+# novels_dir = "./corpus/lower_brow"            # Dime novels from the early 1900's
 # novels_dir = "./corpus/miscellaneous"         # Other interesting novels, unrelated to project
 
 output_filename = "./output.csv"
@@ -149,12 +149,14 @@ def average_tree_depth(sentences):
 # Average dependency distance as defined in Oya's 2008 paper
 # Applied only to sentences with >10 or <=20 words. Measures "difficulty" of reading sentences.
 def average_dependency_distance(sentences):
-    stanfordNLP = StanfordCoreNLP(stanfordCoreNLP_directory)
+    stanfordNLP = StanfordCoreNLP(stanfordCoreNLP_directory, memory = "8g")
     n_sentences = 0
     dd_sum = 0
     for sentence in sentences:
         sentence = sentence.encode("utf-8")
         tokens = sentence.split()
+        if (len(tokens) > 20) or (len(tokens) < 10):
+            continue
         curr_sum = 0
         dep_tuples = stanfordNLP.dependency_parse(sentence)
         for dep_tuple in dep_tuples:
@@ -164,7 +166,7 @@ def average_dependency_distance(sentences):
         n_sentences += 1
         dd_sum += curr_add
         if VERBOSE and (n_sentences % 100) == 0:
-            print("    Parsed a sentence (#{0}): avg. dep. dist. = {1:.4f}".format(n_sentences, curr_add))
+            print("  Parsed a sentence (#{0}): avg. dep. dist. = {1:.4f}".format(n_sentences, curr_add))
     stanfordNLP.close()
     return 1.0 * dd_sum / n_sentences
 
@@ -228,6 +230,22 @@ def write_data_to_file(data, filename):
         writer = csv.writer(output_file)
         writer.writerow(data)
         print("Wrote data to csv file")
+
+# Alternate main module used to get ADD per novel independently (since coreNLP couldn't handle more than one at a time)
+def main_avg_dep_dist():
+    novel_filename = "1962-01_The_Reivers.txt"
+    novel_path = novels_dir + "/" + novel_filename
+    title = title_from_filename(novel_filename)
+    with open(novel_path) as textfile:
+        sentences = sent_tokenize(textfile.read().decode("utf-8"))
+        print("Title: {}".format(title))
+        novel_ADD = average_dependency_distance(sentences)
+        print("Average depepdency distance: {}".format(novel_ADD))
+        with open("corenlp-add-out.csv", "a") as output_file:
+            writer = csv.writer(output_file)
+            writer.writerow([novel_ADD])
+            print("Wrote data to csv file")
+        return
 
 def main():
     print_title_and_underline("Basic Metrics")
