@@ -10,7 +10,8 @@ import csv
 
 # novels_dir = "./corpus/novels"
 # novels_dir = "./corpus/higher_brow"
-novels_dir = "./corpus/lower_brow"
+# novels_dir = "./corpus/lower_brow"
+novels_dir = "./corpus/miscellaneous"
 
 char_names_dir = "./resources/character_names"
 
